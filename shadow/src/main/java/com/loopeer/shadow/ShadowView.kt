@@ -5,16 +5,16 @@ import android.content.res.ColorStateList
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
-import android.util.AttributeSet
-import android.widget.FrameLayout
 import android.os.Build
 import android.support.v4.content.ContextCompat
+import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 
 
-class ShadowView @JvmOverloads constructor(context: Context?, attributeSet: AttributeSet? = null, defStyleInt: Int = 0)
+open class ShadowView @JvmOverloads constructor(context: Context?, attributeSet: AttributeSet? = null, defStyleInt: Int = 0)
     : ViewGroup(context, attributeSet, defStyleInt) {
     private val DEFAULT_CHILD_GRAVITY = Gravity.TOP or Gravity.START
 
@@ -41,7 +41,6 @@ class ShadowView @JvmOverloads constructor(context: Context?, attributeSet: Attr
     var backgroundClr: Int = 0
         set(value) {
             field = value
-            bgPaint.color = value
             invalidate()
         }
 
@@ -100,12 +99,12 @@ class ShadowView @JvmOverloads constructor(context: Context?, attributeSet: Attr
         val a = getContext().obtainStyledAttributes(attributeSet, R.styleable.ShadowView,
                 defStyleInt, 0)
         shadowColor = a.getColor(R.styleable.ShadowView_shadowColor
-                , ContextCompat.getColor(context, R.color.shadow_view_default_shadow_color))
+                , ContextCompat.getColor(context!!, R.color.shadow_view_default_shadow_color))
         foregroundColor = a.getColor(R.styleable.ShadowView_foregroundColor
-                , ContextCompat.getColor(context, R.color.shadow_view_foreground_color_dark))
+                , ContextCompat.getColor(context!!, R.color.shadow_view_foreground_color_dark))
         backgroundClr = a.getColor(R.styleable.ShadowView_backgroundColor, Color.WHITE)
         shadowDx = a.getFloat(R.styleable.ShadowView_shadowDx, 0f)
-        shadowDy = a.getFloat(R.styleable.ShadowView_shadowDy, 0f)
+        shadowDy = a.getFloat(R.styleable.ShadowView_shadowDy, 1f)
         shadowRadius = a.getDimensionPixelSize(R.styleable.ShadowView_shadowRadius, SIZE_DEFAULT).toFloat()
         val d = a.getDrawable(R.styleable.ShadowView_android_foreground)
         if (d != null) {
@@ -137,12 +136,9 @@ class ShadowView @JvmOverloads constructor(context: Context?, attributeSet: Attr
             cornerRadiusBR = a.getDimensionPixelSize(R.styleable.ShadowView_cornerRadiusBR, SIZE_DEFAULT).toFloat()
         }
         a.recycle()
-
         bgPaint.color = backgroundClr
         bgPaint.isAntiAlias = true
         bgPaint.style = Paint.Style.FILL
-        bgPaint.setShadowLayer(shadowRadius, 0f, 1f,
-                shadowColor)
         setLayerType(LAYER_TYPE_SOFTWARE, null)
         setWillNotDraw(false)
         background = null
@@ -286,6 +282,7 @@ class ShadowView @JvmOverloads constructor(context: Context?, attributeSet: Attr
                     , cornerRadiusBR
                     , cornerRadiusBL)
             it.drawPath(path, bgPaint)
+            canvas.clipPath(path)
         }
     }
 
